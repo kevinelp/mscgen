@@ -136,7 +136,27 @@ static FILE *getPsFile(struct ADrawTag *ctx)
  */
 static int getSpace(struct ADrawTag *ctx, long thousanths)
 {
-    return ((thousanths * getPsCtx(ctx)->fontPoints) + 500) / 1000;
+        long space;
+        int negative;
+
+        /* work in positive units so additions always increase space */
+        if (thousanths < 0) {
+                negative = 1;
+                thousanths = -thousanths;
+        } else {
+                negative = 0;
+        }
+
+        /* round up to the next whole point size (don't round down)
+         * and add 1pt extra for space 
+         */
+        space = ((thousanths * getPsCtx(ctx)->fontPoints) + 999) / 1000 + 1;
+
+        if (negative) {
+                return - space;
+        } else {
+                return space;
+        }
 }
 
 /** Write out a line of text, escaping special characters.
